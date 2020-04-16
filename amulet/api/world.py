@@ -6,6 +6,7 @@ import os
 import shutil
 from typing import Union, Generator, Dict, Optional, Tuple, List, Callable, Any
 from types import GeneratorType
+from threading import Lock
 
 from amulet import log
 from .block import Block, BlockManager
@@ -104,6 +105,8 @@ class World(BaseStructure):
         self._chunk_history_manager = ChunkHistoryManager(
             os.path.join(self._temp_directory, "chunks")
         )
+        self._chunk_lock = Lock()
+
 
     @property
     def world_path(self) -> str:
@@ -260,20 +263,21 @@ class World(BaseStructure):
         :param dimension: The dimension to get the chunk from
         :return: The blocks, entities, and tile entities in the chunk
         """
-        chunk_key = (dimension, cx, cz)
-        if chunk_key in self._chunk_cache:
-            chunk = self._chunk_cache[(dimension, cx, cz)]
-        elif chunk_key in self._chunk_history_manager:
-            chunk = self._chunk_cache[
-                (dimension, cx, cz)
-            ] = self._chunk_history_manager.get_current(*chunk_key)
-        else:
-            chunk = self._world_wrapper.load_chunk(cx, cz, self._palette, dimension)
-            self._chunk_cache[(dimension, cx, cz)] = chunk
-            self._chunk_history_manager.add_original_chunk(chunk, dimension)
+        with self._chunk_lock:
+            chunk_key = (dimension, cx, cz)
+            if chunk_key in self._chunk_cache:
+                chunk = self._chunk_cache[(dimension, cx, cz)]
+            elif chunk_key in self._chunk_history_manager:
+                chunk = self._chunk_cache[
+                    (dimension, cx, cz)
+                ] = self._chunk_history_manager.get_current(*chunk_key)
+            else:
+                chunk = self._world_wrapper.load_chunk(cx, cz, self._palette, dimension)
+                self._chunk_cache[(dimension, cx, cz)] = chunk
+                self._chunk_history_manager.add_original_chunk(chunk, dimension)
 
-        if chunk is None:
-            raise ChunkDoesNotExist(f"Chunk ({cx},{cz}) has been deleted")
+            if chunk is None:
+                raise ChunkDoesNotExist(f"Chunk ({cx},{cz}) has been deleted")
 
         return chunk
 
