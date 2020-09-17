@@ -8,13 +8,24 @@ matrix:
       os: osx
       osx_image: xcode11
       language: shell
-    - name: "Python 3.7.4 on Windows"
+    - name: "Python 3.7.5 on Windows"
       os: windows
       language: shell
-      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
+      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH PYTHON_VER=3.7.5
+    - name: "Python 3.8.5 on Linux"
+        python: 3.8.5
+        language: python
+    - name: "Python 3.8.0 on macOS"
+        os: osx
+        osx_image: xcode11.3
+        language: shell
+    - name: "Python 3.8.5 on Windows"
+        os: windows
+        language: shell
+        env: PATH=/c/Python37:/c/Python37/Scripts:$PATH PYTHON_VER=3.8.5
 
 before_install:
-  - if [ "$TRAVIS_OS_NAME" = "windows" ] ; then choco install python --version 3.7.5; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ] ; then choco install python --version $PYTHON_VER; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ] ; then python -m pip install --upgrade pip ; fi
   - export AMULET_VERSION=$TRAVIS_TAG
 
