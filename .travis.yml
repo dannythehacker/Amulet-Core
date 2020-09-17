@@ -13,16 +13,16 @@ matrix:
       language: shell
       env: PATH=/c/Python37:/c/Python37/Scripts:$PATH PYTHON_VER=3.7.5
     - name: "Python 3.8.5 on Linux"
-        python: 3.8.5
-        language: python
+      python: 3.8.5
+      language: python
     - name: "Python 3.8.0 on macOS"
-        os: osx
-        osx_image: xcode11.3
-        language: shell
+      os: osx
+      osx_image: xcode11.3
+      language: shell
     - name: "Python 3.8.5 on Windows"
-        os: windows
-        language: shell
-        env: PATH=/c/Python37:/c/Python37/Scripts:$PATH PYTHON_VER=3.8.5
+      os: windows
+      language: shell
+      env: PATH=/c/Python37:/c/Python37/Scripts:$PATH PYTHON_VER=3.8.5
 
 before_install:
   - if [ "$TRAVIS_OS_NAME" = "windows" ] ; then choco install python --version $PYTHON_VER; fi
